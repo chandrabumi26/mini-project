@@ -1,29 +1,72 @@
 import React, { useEffect } from 'react';
 import { Search, Plus, Eye, Edit, Trash2, Loader2, AlertCircle, Star } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
-import { getProducts, setSearchQuery } from '../features/products/productsSlice';
+import { getProducts, setSearchQuery, deleteProduct } from '../features/products/productsSlice';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const ProductList: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { items, loading, error, searchQuery } = useAppSelector((state) => state.products);
+  const { items, loading, error, searchQuery, preventCallApi } = useAppSelector((state) => state.products);
+  const [showFixedModal, setShowFixedModal] = React.useState(false);
 
   useEffect(() => {
+    if (preventCallApi) return;
     const delayDebounceFn = setTimeout(() => {
       dispatch(getProducts({ search: searchQuery }));
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [dispatch, searchQuery]);
+  }, [dispatch, searchQuery, preventCallApi]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch(setSearchQuery(e.target.value));
   };
 
+  const handleDelete = async (id: number | string, title: string) => {
+    if (window.confirm(`Are you sure you want to delete "${title}"?`)) {
+      dispatch(deleteProduct(id));
+    }
+  };
+
   return (
     <div className="space-y-8 pb-12">
+      <AnimatePresence>
+        {showFixedModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowFixedModal(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              className="relative w-full max-w-md bg-card border rounded-4xl p-8 shadow-2xl text-center space-y-6 overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 h-32 w-32 bg-primary/10 rounded-full blur-3xl -mr-16 -mt-16" />
+              <div className="h-20 w-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                <AlertCircle className="text-primary" size={40} />
+              </div>
+              <h3 className="text-2xl font-black tracking-tight">Local Snapshot Only</h3>
+              <p className="text-muted-foreground leading-relaxed font-medium">
+                Product ini merupakan product yang di save di state. Karena ini memakai api dummyjson jadi CRUD product tidak realtime. Jadinya data tersimpan di state. Namun, hit API tetap berjalan dan dapat di cek di network.
+              </p>
+              <button 
+                onClick={() => setShowFixedModal(false)}
+                className="w-full py-4 bg-primary text-primary-foreground font-black rounded-2xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
+              >
+                Close
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h1 className="text-4xl font-extrabold tracking-tight">Products</h1>
@@ -98,32 +141,53 @@ const ProductList: React.FC = () => {
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
                     transition={{ delay: i * 0.05, duration: 0.4 }}
-                    className="group relative bg-card border rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-2 transition-all duration-500"
+                    className="group relative bg-card border rounded-4xl overflow-hidden hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-2 transition-all duration-500"
                   >
                     {/* Image Section */}
-                    <div className="relative aspect-[4/3] overflow-hidden bg-secondary/30">
+                    <div className="relative aspect-4/3 overflow-hidden bg-secondary/30">
                       <img 
                         src={product.thumbnail} 
                         alt={product.title} 
                         className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       
                       {/* Floating Actions on Image */}
                       <div className="absolute bottom-4 left-0 right-0 px-6 flex justify-center gap-3 translate-y-12 group-hover:translate-y-0 transition-transform duration-500 delay-75">
                         <button 
-                          onClick={() => navigate(`/products/${product.id}`)}
+                          onClick={() => {
+                            if (product.preventEdit) {
+                              setShowFixedModal(true);
+                              return;
+                            }
+                            navigate(`/products/${product.id}`)
+                          }}
                           className="p-3 bg-white text-black rounded-xl shadow-xl hover:bg-primary hover:text-white transition-all transform hover:scale-110"
                         >
                           <Eye size={20} />
                         </button>
                         <button 
-                          onClick={() => navigate(`/products/edit/${product.id}`)}
+                          onClick={() => {
+                            if (product.preventEdit) {
+                              setShowFixedModal(true);
+                              return;
+                            }
+                            navigate(`/products/edit/${product.id}`)
+                          }}
                           className="p-3 bg-white text-black rounded-xl shadow-xl hover:bg-orange-500 hover:text-white transition-all transform hover:scale-110"
                         >
                           <Edit size={20} />
                         </button>
-                        <button className="p-3 bg-white text-black rounded-xl shadow-xl hover:bg-red-500 hover:text-white transition-all transform hover:scale-110">
+                        <button 
+                          onClick={() => {
+                            if (product.preventEdit) {
+                              setShowFixedModal(true);
+                              return;
+                            }
+                            handleDelete(product.id, product.title)
+                          }}
+                          className="p-3 bg-white text-black rounded-xl shadow-xl hover:bg-red-500 hover:text-white transition-all transform hover:scale-110"
+                        >
                           <Trash2 size={20} />
                         </button>
                       </div>

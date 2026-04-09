@@ -46,6 +46,7 @@ export interface Product {
   meta: Meta;
   thumbnail: string;
   images: string[];
+  preventEdit?: boolean;
 }
 
 export interface ProductsResponse {
@@ -62,6 +63,7 @@ interface ProductsState {
   loading: boolean;
   error: string | null;
   searchQuery: string;
+  preventCallApi: boolean;
 }
 
 const initialState: ProductsState = {
@@ -71,6 +73,7 @@ const initialState: ProductsState = {
   loading: false,
   error: null,
   searchQuery: '',
+  preventCallApi: false,
 };
 
 export const getProducts = createAsyncThunk<ProductsResponse, { search?: string } | undefined, { rejectValue: string }>(
@@ -100,6 +103,54 @@ export const getProductById = createAsyncThunk<Product, string | number, { rejec
       if (typeof error === 'object' && error !== null && 'response' in error) {
         const axiosError = error as { response?: { data?: { message?: string } } };
         return rejectWithValue(axiosError.response?.data?.message || 'Failed to fetch product details');
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+);
+
+export const addProduct = createAsyncThunk<Product, Partial<Product>, { rejectValue: string }>(
+  'products/addProduct',
+  async (productData, { rejectWithValue }) => {
+    try {
+      const response = await api.post<Product>('/products/add', productData);
+      return response.data;
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        return rejectWithValue(axiosError.response?.data?.message || 'Failed to add product');
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+);
+
+export const updateProduct = createAsyncThunk<Product, { id: number | string; data: Partial<Product> }, { rejectValue: string }>(
+  'products/updateProduct',
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      const response = await api.put<Product>(`/products/${id}`, data);
+      return response.data;
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        return rejectWithValue(axiosError.response?.data?.message || 'Failed to update product');
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+);
+
+export const deleteProduct = createAsyncThunk<number | string, number | string, { rejectValue: string }>(
+  'products/deleteProduct',
+  async (id, { rejectWithValue }) => {
+    try {
+      await api.delete(`/products/${id}`);
+      return id;
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        return rejectWithValue(axiosError.response?.data?.message || 'Failed to delete product');
       }
       return rejectWithValue('An unexpected error occurred');
     }
@@ -141,6 +192,49 @@ const productsSlice = createSlice({
         state.selectedProduct = action.payload;
       })
       .addCase(getProductById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Something went wrong';
+      })
+      .addCase(addProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addProduct.fulfilled, (state, action: PayloadAction<Product>) => {
+        state.loading = false;
+        action.payload.preventEdit = true;
+        state.items = [action.payload, ...state.items];
+        state.total += 1;
+        state.preventCallApi = true;
+      })
+      .addCase(addProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Something went wrong';
+      })
+      .addCase(updateProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProduct.fulfilled, (state, action: PayloadAction<Product>) => {
+        state.loading = false;
+        action.payload.preventEdit = true;
+        state.items = state.items.map((p) => (p.id === action.payload.id ? action.payload : p));
+        state.selectedProduct = action.payload;
+        state.preventCallApi = true;
+      })
+      .addCase(updateProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Something went wrong';
+      })
+      .addCase(deleteProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteProduct.fulfilled, (state, action: PayloadAction<number | string>) => {
+        state.loading = false;
+        state.items = state.items.filter((p) => p.id !== action.payload);
+        state.total -= 1;
+      })
+      .addCase(deleteProduct.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Something went wrong';
       });

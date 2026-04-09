@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, Star, ShieldCheck, Loader2, AlertCircle, ShoppingBag, BadgeCheck } from 'lucide-react';
+import { ArrowLeft, Star, ShieldCheck, Loader2, AlertCircle, BadgeCheck } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../app/hooks';
 import { getProductById, clearSelectedProduct } from '../features/products/productsSlice';
@@ -68,19 +68,17 @@ const ProductDetail: React.FC = () => {
         <ArrowLeft size={18} /> Back to Products
       </motion.button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 bg-card border rounded-[2.5rem] p-8 lg:p-12 shadow-sm relative overflow-hidden">
-        {/* Background blobs for premium feel */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 bg-card border rounded-4xl p-8 lg:p-12 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 h-64 w-64 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32" />
         <div className="absolute bottom-0 left-0 h-64 w-64 bg-secondary/20 rounded-full blur-3xl -ml-32 -mb-32" />
 
-        {/* Image Gallery Section */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
           className="space-y-6 z-10"
         >
-          <div className="aspect-square bg-secondary/30 rounded-[2rem] overflow-hidden flex items-center justify-center border-2 border-transparent hover:border-primary/10 transition-colors group">
+          <div className="aspect-square bg-secondary/30 rounded-4xl overflow-hidden flex items-center justify-center border-2 border-transparent hover:border-primary/10 transition-colors group">
             <AnimatePresence mode="wait">
               <motion.img 
                 key={activeImage}
@@ -110,7 +108,6 @@ const ProductDetail: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Product Details Section */}
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -160,9 +157,8 @@ const ProductDetail: React.FC = () => {
             </p>
           </div>
 
-          {/* Key Features / Chips */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="p-5 bg-card border rounded-[1.5rem] flex items-center gap-4 hover:shadow-lg transition-shadow">
+            <div className="p-5 bg-card border rounded-3xl flex items-center gap-4 hover:shadow-lg transition-shadow">
               <div className="h-12 w-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                 <ShieldCheck size={24} />
               </div>
@@ -171,24 +167,6 @@ const ProductDetail: React.FC = () => {
                 <p className="text-sm font-bold">{product.warrantyInformation}</p>
               </div>
             </div>
-          </div>
-
-          <div className="flex gap-4 pt-4">
-            <motion.button 
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="flex-1 py-5 bg-primary text-primary-foreground font-black text-lg rounded-[1.5rem] shadow-2xl shadow-primary/20 hover:shadow-primary/40 transition-all flex items-center justify-center gap-3"
-            >
-              <ShoppingBag size={24} /> Add to System
-            </motion.button>
-            <motion.button 
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate(`/products/edit/${product.id}`)}
-              className="px-8 py-5 bg-secondary text-foreground font-black text-lg rounded-[1.5rem] border hover:bg-secondary/70 transition-all"
-            >
-              Edit 
-            </motion.button>
           </div>
         </motion.div>
       </div>
