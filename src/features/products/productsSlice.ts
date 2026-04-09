@@ -58,6 +58,7 @@ export interface ProductsResponse {
 interface ProductsState {
   items: Product[];
   total: number;
+  selectedProduct: Product | null;
   loading: boolean;
   error: string | null;
   searchQuery: string;
@@ -66,6 +67,7 @@ interface ProductsState {
 const initialState: ProductsState = {
   items: [],
   total: 0,
+  selectedProduct: null,
   loading: false,
   error: null,
   searchQuery: '',
@@ -88,12 +90,31 @@ export const getProducts = createAsyncThunk<ProductsResponse, { search?: string 
   }
 );
 
+export const getProductById = createAsyncThunk<Product, string | number, { rejectValue: string }>(
+  'products/getProductById',
+  async (id, { rejectWithValue }) => {
+    try {
+      const response = await api.get<Product>(`/products/${id}`);
+      return response.data;
+    } catch (error: unknown) {
+      if (typeof error === 'object' && error !== null && 'response' in error) {
+        const axiosError = error as { response?: { data?: { message?: string } } };
+        return rejectWithValue(axiosError.response?.data?.message || 'Failed to fetch product details');
+      }
+      return rejectWithValue('An unexpected error occurred');
+    }
+  }
+);
+
 const productsSlice = createSlice({
   name: 'products',
   initialState,
   reducers: {
     setSearchQuery: (state, action: PayloadAction<string>) => {
       state.searchQuery = action.payload;
+    },
+    clearSelectedProduct: (state) => {
+      state.selectedProduct = null;
     },
   },
   extraReducers: (builder) => {
@@ -110,9 +131,21 @@ const productsSlice = createSlice({
       .addCase(getProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || 'Something went wrong';
+      })
+      .addCase(getProductById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getProductById.fulfilled, (state, action: PayloadAction<Product>) => {
+        state.loading = false;
+        state.selectedProduct = action.payload;
+      })
+      .addCase(getProductById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Something went wrong';
       });
   },
 });
 
-export const { setSearchQuery } = productsSlice.actions;
+export const { setSearchQuery, clearSelectedProduct } = productsSlice.actions;
 export default productsSlice.reducer;
