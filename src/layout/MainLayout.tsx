@@ -14,7 +14,7 @@ const MainLayout: React.FC = () => {
     <div className="flex h-screen bg-background overflow-hidden relative">
       <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
       
-      {/* Overlay for mobile */}
+
       <AnimatePresence>
         {isSidebarOpen && (
           <motion.div

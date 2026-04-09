@@ -180,7 +180,7 @@ const ProductDetail: React.FC = () => {
         <h2 className="text-3xl font-black">Customer Reviews</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {product.reviews.map((review, i) => (
-            <div key={i} className="p-6 bg-card border rounded-[2rem] space-y-4 hover:border-primary/20 transition-all shadow-sm">
+            <div key={i} className="p-6 bg-card border rounded-4xl space-y-4 hover:border-primary/20 transition-all shadow-sm">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1 text-orange-400">
                   {[...Array(5)].map((_, idx) => (

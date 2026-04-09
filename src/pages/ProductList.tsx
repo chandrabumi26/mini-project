@@ -143,7 +143,6 @@ const ProductList: React.FC = () => {
                     transition={{ delay: i * 0.05, duration: 0.4 }}
                     className="group relative bg-card border rounded-4xl overflow-hidden hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-2 transition-all duration-500"
                   >
-                    {/* Image Section */}
                     <div className="relative aspect-4/3 overflow-hidden bg-secondary/30">
                       <img 
                         src={product.thumbnail} 
@@ -152,7 +151,6 @@ const ProductList: React.FC = () => {
                       />
                       <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       
-                      {/* Floating Actions on Image */}
                       <div className="absolute bottom-4 left-0 right-0 px-6 flex justify-center gap-3 translate-y-12 group-hover:translate-y-0 transition-transform duration-500 delay-75">
                         <button 
                           onClick={() => {
@@ -192,7 +190,6 @@ const ProductList: React.FC = () => {
                         </button>
                       </div>
 
-                      {/* Top Badge */}
                       <div className="absolute top-4 left-4">
                         <span className={`px-3 py-1.5 text-[10px] font-black uppercase rounded-xl backdrop-blur-md ${
                           product.stock > 10 
@@ -206,7 +203,6 @@ const ProductList: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Content Section */}
                     <div className="p-6 space-y-4">
                       <div className="space-y-1">
                         <div className="flex items-center justify-between gap-2">

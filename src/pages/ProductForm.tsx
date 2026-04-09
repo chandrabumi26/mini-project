@@ -32,17 +32,18 @@ const ProductForm: React.FC = () => {
 
   useEffect(() => {
     if (isEdit && selectedProduct && formData.title === '') {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+
       setFormData({
-        title: selectedProduct.title,
-        category: selectedProduct.category,
-        brand: selectedProduct.brand,
-        description: selectedProduct.description,
-        price: selectedProduct.price.toString(),
-        stock: selectedProduct.stock.toString(),
+        title: selectedProduct.title || '',
+        category: selectedProduct.category || '',
+        brand: selectedProduct.brand || '',
+        description: selectedProduct.description || '',
+        price: selectedProduct.price?.toString() || '',
+        stock: selectedProduct.stock?.toString() || '',
       });
     }
-  }, [isEdit, selectedProduct, formData.title]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEdit, selectedProduct]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
