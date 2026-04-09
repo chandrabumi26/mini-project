@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppSelector } from '../app/hooks';
-import { User as UserIcon, Bell, Settings } from 'lucide-react';
+import { User as UserIcon } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
@@ -11,12 +11,6 @@ const Navbar: React.FC = () => {
       </div>
 
       <div className="flex items-center gap-4">
-        <button className="p-2 rounded-full hover:bg-secondary transition-all">
-          <Bell size={20} className="text-muted-foreground" />
-        </button>
-        <button className="p-2 rounded-full hover:bg-secondary transition-all">
-          <Settings size={20} className="text-muted-foreground" />
-        </button>
         <div className="h-8 w-px bg-border mx-2" />
         <div className="flex items-center gap-3">
           <div className="text-right">
